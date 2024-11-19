@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Auction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 450px;
+        }
+        .form-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #007BFF;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .form-group button {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+    <script>
+        // Form validation
+        function validateForm(event) {
+            let isValid = true;
+
+            // Clear previous error messages
+            document.querySelectorAll('.error').forEach(error => {
+                error.style.display = 'none';
+            });
+
+            // Validate address
+            const address = document.getElementById('address').value;
+            if (!address) {
+                showError('addressError', 'Address is required');
+                isValid = false;
+            }
+
+            // Validate size
+            const size = document.getElementById('size').value;
+            if (!size || size <= 0) {
+                showError('sizeError', 'Size must be a positive number');
+                isValid = false;
+            }
+
+            // Validate starting bid
+            const startingBid = document.getElementById('starting_bid').value;
+            if (!startingBid || startingBid <= 0) {
+                showError('startingBidError', 'Starting bid must be a positive number');
+                isValid = false;
+            }
+
+            // Validate reserve price
+            const reservePrice = document.getElementById('reserve_price').value;
+            if (!reservePrice || reservePrice <= 0) {
+                showError('reservePriceError', 'Reserve price must be a positive number');
+                isValid = false;
+            }
+
+            // Validate start date
+            const startDate = document.getElementById('start_date').value;
+            if (!startDate) {
+                showError('startDateError', 'Start date is required');
+                isValid = false;
+            }
+
+            // Validate end date
+            const endDate = document.getElementById('end_date').value;
+            if (!endDate || new Date(endDate) <= new Date(startDate)) {
+                showError('endDateError', 'End date must be after the start date');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        }
+
+        function showError(id, message) {
+            const errorElement = document.getElementById(id);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Create New Auction</h2>
+        <form method="post" action="{% url 'create_auction' %}" onsubmit="validateForm(event)">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="address">Property Address</label>
+                <input type="text" id="address" name="address" required>
+                <div id="addressError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="size">Property Size (sq ft)</label>
+                <input type="number" id="size" name="size" required>
+                <div id="sizeError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="property_type">Property Type</label>
+                <select id="property_type" name="property_type" required>
+                    <option value="House">House</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Land">Land</option>
+                    <option value="Commercial">Commercial</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="starting_bid">Starting Bid</label>
+                <input type="number" id="starting_bid" name="starting_bid" required>
+                <div id="startingBidError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="reserve_price">Reserve Price</label>
+                <input type="number" id="reserve_price" name="reserve_price" required>
+                <div id="reservePriceError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="datetime-local" id="start_date" name="start_date" required>
+                <div id="startDateError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="datetime-local" id="end_date" name="end_date" required>
+                <div id="endDateError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <button type="submit">Create Auction</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

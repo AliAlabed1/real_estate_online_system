@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar .user-section {
+            position: relative;
+        }
+
+        .navbar .user-section .avatar {
+            background-color: #ffffff;
+            color: #007BFF;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .navbar .user-section .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            width: 200px;
+        }
+
+        .navbar .user-section .dropdown-menu a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .navbar .user-section .dropdown-menu a:hover {
+            background-color: #007BFF;
+            color: white;
+        }
+        .wallet-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+            margin: auto;
+        }
+
+        .wallet-balance {
+            font-size: 24px;
+            color: #007BFF;
+            margin-bottom: 20px;
+        }
+
+        .charge-form input[type="number"] {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .charge-form button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .charge-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="your-logo-url-here.png" alt="Logo">
+            <h1>Auction Site</h1>
+        </div>
+        <div >
+            <a style="text-decoration: none;color: white;" href="{% url 'home' %}">Home</a>
+        </div>
+        <div class="user-section">
+            {% if user.is_authenticated %}
+                <div id="avatar" class="avatar">
+                    {{ user.username|slice:":1" }}
+                </div>
+                <div id="dropdownMenu" class="dropdown-menu">
+                    {% if user.usertype == "buyer" %}
+                        <a href="{% url 'wallet' %}">Wallet</a>
+                        <a href="{% url 'bids_history' %}">Bids History</a>
+                    {% elif user.usertype == "seller" %}
+                        <a href="{% url 'create_auction' %}">Create New Auction</a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}">Logout</a>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" style="color: white; text-decoration: none;">Login</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="wallet-container">
+        <h1>My Wallet</h1>
+        <p class="wallet-balance">Current Balance: ${{ wallet.balance }}</p>
+        <form method="post" class="charge-form">
+            {% csrf_token %}
+            <input type="number" name="charge_amount" min="0.01" step="0.01" placeholder="Enter amount to charge" required>
+            <button type="submit">Charge Wallet</button>
+        </form>
+    </div>
+</body>
+</html>

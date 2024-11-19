@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar .user-section {
+            position: relative;
+        }
+
+        .navbar .user-section .avatar {
+            background-color: #ffffff;
+            color: #007BFF;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .navbar .user-section .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            width: 200px;
+        }
+
+        .navbar .user-section .dropdown-menu a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .navbar .user-section .dropdown-menu a:hover {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        /* Tabs and Content Styles */
+        .tabs, .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #007BFF;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active, .tab:hover {
+            color: #0056b3;
+            border-bottom: 2px solid #0056b3;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .auction-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .auction-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .auction-card {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .auction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    </style>
+    <script>
+        // Dropdown Menu Functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const avatar = document.getElementById('avatar');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+
+            avatar.addEventListener('click', function () {
+                dropdownMenu.style.display =
+                    dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!avatar.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        });
+
+        // Tab Switching Functionality
+        function openTab(evt, tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            evt.currentTarget.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">
+            <img src="your-logo-url-here.png" alt="Logo">
+            <h1>Auction Site</h1>
+        </div>
+        <div class="user-section">
+            {% if user.is_authenticated %}
+                <div id="avatar" class="avatar">
+                    {{ user.username|slice:":1" }}
+                </div>
+                <div id="dropdownMenu" class="dropdown-menu">
+                    {% if user.usertype == "buyer" %}
+                        <a href="{% url 'wallet' %}">Wallet</a>
+                        <a href="{% url 'bids_history' %}">Bids History</a>
+                    {% elif user.usertype == "seller" %}
+                        <a href="{% url 'create_auction' %}">Create New Auction</a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}">Logout</a>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" style="color: white; text-decoration: none;">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" onclick="openTab(event, 'Ongoing')">Ongoing</button>
+        <button class="tab" onclick="openTab(event, 'Upcoming')">Upcoming</button>
+        <button class="tab" onclick="openTab(event, 'Ended')">Ended</button>
+    </div>
+
+    <!-- Content -->
+    <div class="container">
+        <!-- Ongoing Auctions -->
+        <div id="Ongoing" class="tab-content active">
+            <div class="auction-list">
+                {% for auction in ongoing_auctions %}
+                    <a href="{% if user.is_authenticated and user.usertype == 'buyer' %}{% url 'auction_details' auction.id %}{% elif user.is_authenticated and user.usertype == 'seller' %}{% url 'edit_auction' auction.id %}{% endif %}" 
+                        class="auction-card-link">
+                        <div class="auction-card">
+                            <h3>{{ auction.property.property_type }}</h3>
+                            <p>Location: {{ auction.property.address }}</p>
+                            <p>Starting Bid: ${{ auction.starting_bid }}</p>
+                            <p>Ends: {{ auction.end_date }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Upcoming Auctions -->
+        <div id="Upcoming" class="tab-content">
+            <div class="auction-list">
+                {% for auction in upcoming_auctions %}
+                <a href="{% if user.is_authenticated and user.usertype == 'seller' %}{% url 'edit_auction' auction.id %}{% endif %}" 
+                    class="auction-card-link">
+                    <div class="auction-card">
+                        <h3>{{ auction.property.property_type }}</h3>
+                        <p>Location: {{ auction.property.address }}</p>
+                        <p>Starting Bid: ${{ auction.starting_bid }}</p>
+                        <p>Ends: {{ auction.end_date }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Ended Auctions -->
+        <div id="Ended" class="tab-content">
+            <div class="auction-list">
+                {% for auction in ended_auctions %}
+                    <a href="{% if user.is_authenticated and user.usertype == 'seller' %}{% url 'edit_auction' auction.id %}{% endif %}" 
+                        class="auction-card-link">
+                        <div class="auction-card">
+                            <h3>{{ auction.property.property_type }}</h3>
+                            <p>Location: {{ auction.property.address }}</p>
+                            <p>Starting Bid: ${{ auction.starting_bid }}</p>
+                            <p>Ends: {{ auction.end_date }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

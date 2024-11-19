@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Auction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 450px;
+        }
+        .form-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #007BFF;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group button ,.btn {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .form-group .danger {
+            background-color: #dc3545;
+        }
+        .form-group .danger:hover {
+            background-color: #b02a37;
+        }
+        .form-group .disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Edit Auction</h2>
+        {% if auction.status == "ended" %}
+            <!-- Auction Ended -->
+            <p style="color: red; text-align: center;">This auction has ended. You can only delete it.</p>
+            <form method="post" style="margin-top: 10px;">
+                {% csrf_token %}
+                <button class="btn" type="submit" name="delete" class="danger">Delete Auction</button>
+            </form>
+        {% else %}
+            <!-- Auction Ongoing or Upcoming -->
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="starting_bid">Starting Bid</label>
+                    <input type="number" id="starting_bid" name="starting_bid" value="{{ auction.starting_bid }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="reserve_price">Reserve Price</label>
+                    <input type="number" id="reserve_price" name="reserve_price" value="{{ auction.reserve_price }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="datetime-local" id="start_date" name="start_date" value="{{ auction.start_date|date:'Y-m-d\\TH:i' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="datetime-local" id="end_date" name="end_date" value="{{ auction.end_date|date:'Y-m-d\\TH:i' }}" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Update Auction</button>
+                </div>
+            </form>
+            <form method="post" style="margin-top: 10px;">
+                {% csrf_token %}
+                <button class="btn" type="submit" name="end" class="danger">End Auction</button>
+            </form>
+            <form method="post" style="margin-top: 10px;">
+                {% csrf_token %}
+                <button class="btn" type="submit" name="delete" class="danger">Delete Auction</button>
+            </form>
+        {% endif %}
+    </div>
+</body>
+</html>
