@@ -10,17 +10,19 @@
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
+            display:flex;
+            flex-direction: column;
+            gap: 20px;
         }
+
         .form-container {
             background: #ffffff;
             padding: 20px 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             width: 450px;
+            margin: auto;
         }
         .form-container h2 {
             margin-bottom: 20px;
@@ -35,14 +37,14 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        .form-group input {
+        .form-group input, .form-group button {
             width: 100%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .form-group button ,.btn {
+        .form-group button,.btn {
             width: 100%;
             background-color: #007BFF;
             color: white;
@@ -66,20 +68,30 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
+    <script>
+        function toggleFileInput() {
+            const fileInput = document.getElementById('file-input-container');
+            fileInput.classList.toggle('hidden');
+        }
+    </script>
+    <link rel="stylesheet" href="../../static/common.css">
 </head>
 <body>
+    <div id="navbar"></div>
     <div class="form-container">
         <h2>Edit Auction</h2>
         {% if auction.status == "ended" %}
-            <!-- Auction Ended -->
             <p style="color: red; text-align: center;">This auction has ended. You can only delete it.</p>
-            <form method="post" style="margin-top: 10px;">
+            <form method="post">
                 {% csrf_token %}
                 <button class="btn" type="submit" name="delete" class="danger">Delete Auction</button>
             </form>
         {% else %}
-            <!-- Auction Ongoing or Upcoming -->
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
@@ -98,10 +110,31 @@
                     <label for="end_date">End Date</label>
                     <input type="datetime-local" id="end_date" name="end_date" value="{{ auction.end_date|date:'Y-m-d\\TH:i' }}" required>
                 </div>
-                <div class="form-group">
-                    <button type="submit">Update Auction</button>
+                <button class="btn" type="submit" name="update">Update Auction</button>
+            </form>
+
+            <!-- Document Section -->
+            <form  method="post" enctype="multipart/form-data" style="margin-top: 20px;">
+                {% csrf_token %}
+                {% if auction.document %}
+                    <div style="margin-bottom: 20px; width: 100%;">
+                        <a  href="{% url 'download_document' auction.id %}" class="btn" target="_blank">Show Document</a>
+                    </div>
+                    <button type="button" class="btn" style="margin-top: 10px;" onclick="toggleFileInput()">Change Document</button>
+                {% else %}
+                    <div class="form-group">
+                        <label for="file">Attach Document</label>
+                        <input type="file" name="file" id="file" required>
+                    </div>
+                    <button class="btn" type="submit" name="upload_document">Attach Document</button>
+                {% endif %}
+                <div id="file-input-container" class="form-group hidden">
+                    <label for="file">Choose New Document</label>
+                    <input type="file" name="file" id="file" required>
+                    <button class="btn" type="submit" name="upload_document">Upload Document</button>
                 </div>
             </form>
+
             <form method="post" style="margin-top: 10px;">
                 {% csrf_token %}
                 <button class="btn" type="submit" name="end" class="danger">End Auction</button>
@@ -112,5 +145,7 @@
             </form>
         {% endif %}
     </div>
+    <a style="margin: auto;width: fit-content;padding: 10px;margin: auto;margin-bottom: 50px;" class="btn" href="{% url 'home' %}">back</a>
+    <script src="../../static/common.js"></script>
 </body>
 </html>

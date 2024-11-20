@@ -2,11 +2,14 @@
 
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Auction, Property
+from .models import Auction, Property,Document
 from django.utils.timezone import now
 from users.models import Wallet,Bid
 from decimal import Decimal
 from django.contrib import messages
+from .forms import DocumentForm
+from django.http import FileResponse, Http404
+import os
 @login_required
 def create_auction(request):
     if request.method == 'POST':
@@ -43,31 +46,50 @@ def create_auction(request):
 
 @login_required
 def edit_auction(request, auction_id):
-    # Get the auction object
-    auction = get_object_or_404(Auction, id=auction_id, seller=request.user)
+    auction = get_object_or_404(Auction, id=auction_id)
+
+    if request.user != auction.seller:
+        return redirect('home')
 
     if request.method == 'POST':
-        # Check if the seller wants to delete the auction
+        # Handle auction updates
+        if 'update' in request.POST:
+            auction.starting_bid = request.POST.get('starting_bid')
+            auction.reserve_price = request.POST.get('reserve_price')
+            auction.start_date = request.POST.get('start_date')
+            auction.end_date = request.POST.get('end_date')
+            auction.save()
+            messages.success(request, "Auction updated successfully!")
+            return redirect('home')
+
+        # Handle end auction
+        if 'end' in request.POST:
+            auction.status = 'ended'
+            auction.save()
+            messages.success(request, "Auction ended successfully!")
+            return redirect('edit_auction', auction_id=auction.id)
+
+        # Handle delete auction
         if 'delete' in request.POST:
             auction.delete()
-            return redirect('home')  # Redirect to home after deletion
+            messages.success(request, "Auction deleted successfully!")
+            return redirect('home')
 
-        # Check if the seller wants to end the auction
-        if 'end' in request.POST:
-            auction.end_date = now()  # Set end date to the current time
-            auction.status = 'ended'  # Update status if needed
-            auction.save()
-            return redirect('home')  # Redirect to home after ending auction
+        # Handle document upload
+        if 'upload_document' in request.POST:
+            form = DocumentForm(request.POST, request.FILES)
+            if form.is_valid():
+                document, created = Document.objects.get_or_create(auction=auction)
+                document.file = form.cleaned_data['file']
+                document.save()
+                messages.success(request, "Document uploaded successfully!")
+                return redirect('edit_auction', auction_id=auction.id)
+    else:
+        form = DocumentForm()
 
-        # Update auction details
-        auction.starting_bid = request.POST.get('starting_bid', auction.starting_bid)
-        auction.reserve_price = request.POST.get('reserve_price', auction.reserve_price)
-        auction.start_date = request.POST.get('start_date', auction.start_date)
-        auction.end_date = request.POST.get('end_date', auction.end_date)
-        auction.save()
-        return redirect('home')  # Redirect to home after successful update
+    return render(request, 'auctions/edit_auction.html', {'auction': auction, 'form': form})
 
-    return render(request, 'auctions/edit_auction.html', {'auction': auction})
+
 @login_required
 def auction_details_view(request, auction_id):
     # Fetch the auction and associated details
@@ -79,6 +101,9 @@ def auction_details_view(request, auction_id):
 
     # Get the buyer's wallet
     wallet = Wallet.objects.get(buyer=request.user)
+
+    # Check if the auction has a document
+    document = auction.document.file.url if hasattr(auction, 'document') else None
 
     if request.method == 'POST':
         # Handle bid submission
@@ -96,4 +121,15 @@ def auction_details_view(request, auction_id):
         else:
             messages.error(request, "Invalid bid amount.")
 
-    return render(request, 'auctions/auction_details.html', {'auction': auction, 'wallet': wallet})
+    return render(request, 'auctions/auction_details.html', {'auction': auction, 'wallet': wallet, 'document': document})
+
+def download_document(request, auction_id):
+    # Fetch the document associated with the auction
+    document = get_object_or_404(Document, auction__id=auction_id)
+    print(document.file)
+    path = f'{os.getcwd()}/{document.file}'
+    document.file = path
+    try:
+        return FileResponse(document.file.open('rb'), as_attachment=True, filename=document.file.name.split('/')[-1])
+    except FileNotFoundError:
+        raise Http404("Document not found.")

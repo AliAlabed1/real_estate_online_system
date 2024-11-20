@@ -32,3 +32,10 @@ class Auction(models.Model):
 
     def __str__(self):
         return f"Auction for {self.property} by {self.seller.username}"
+
+class Document(models.Model):
+    auction = models.OneToOneField('Auction', on_delete=models.CASCADE, related_name='document')
+    file = models.FileField(upload_to='documents/')
+
+    def __str__(self):
+        return f"Document for Auction {self.auction.id}"

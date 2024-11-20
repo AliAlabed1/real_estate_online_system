@@ -11,11 +11,12 @@
             padding: 0;
             background-color: #f4f4f4;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             height: 100vh;
+            gap: 50px;
         }
         .form-container {
+            margin: auto;
             background: #ffffff;
             padding: 20px 30px;
             border-radius: 10px;
@@ -132,8 +133,10 @@
             errorElement.style.display = 'block';
         }
     </script>
+    <link rel="stylesheet" href="../../static/common.css">
 </head>
 <body>
+    <div id="navbar"></div>
     <div class="form-container">
         <h2>Create New Auction</h2>
         <form method="post" action="{% url 'create_auction' %}" onsubmit="validateForm(event)">
@@ -182,5 +185,7 @@
             </div>
         </form>
     </div>
+    <a style="margin: auto;width: fit-content;padding: 10px;margin: auto;margin-bottom: 50px;" class="btn" href="{% url 'home' %}">back</a>
+    <script src="../../static/common.js"></script>
 </body>
 </html>

@@ -84,8 +84,10 @@
             color: #721c24;
         }
     </style>
+    <link rel="stylesheet" href="../../static/common.css">
 </head>
 <body>
+    <div id="navbar"></div>
     <div class="container">
         <div class="auction-details">
             <h2>{{ auction.property.property_type }}</h2>
@@ -94,6 +96,15 @@
             <p><strong>Reserve Price:</strong> ${{ auction.reserve_price }}</p>
             <p><strong>Ends:</strong> {{ auction.end_date }}</p>
             <p><strong>Your Wallet Balance:</strong> ${{ wallet.balance }}</p>
+        </div>
+
+        <!-- Document Section -->
+        <div class="document-section">
+            {% if document %}
+                <a href="{{ document }}" class="btn" target="_blank">Download Document</a>
+            {% else %}
+                <p style="color: red;">No document available for this auction.</p>
+            {% endif %}
         </div>
 
         <div class="messages">
@@ -111,5 +122,7 @@
             <button type="submit" class="btn">Place Bid</button>
         </form>
     </div>
+    <a style="margin: auto;width: fit-content;padding: 10px;margin: auto;margin-bottom: 50px;" class="btn" href="{% url 'home' %}">back</a>
+    <script src="../../static/common.js"></script>
 </body>
 </html>

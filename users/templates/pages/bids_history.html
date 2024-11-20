@@ -11,8 +11,8 @@
             padding: 0;
             background-color: #f9f9f9;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            gap: 50px;
             min-height: 100vh;
         }
 
@@ -22,6 +22,7 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: auto;
         }
 
         .bid-card {
@@ -50,8 +51,10 @@
             font-size: 14px;
         }
     </style>
+    <link rel="stylesheet" href="../../static/common.css">
 </head>
 <body>
+    <div id="navbar"></div>
     <div class="bids-container">
         <h1>My Bids</h1>
         {% for bid in bids %}
@@ -62,5 +65,7 @@
             </a>
         {% endfor %}
     </div>
+    <a style="margin: auto;width: fit-content;padding: 10px;margin: auto;margin-bottom: 50px;" class="btn" href="{% url 'home' %}">back</a>
+    <script src="../../static/common.js"></script>
 </body>
 </html>
