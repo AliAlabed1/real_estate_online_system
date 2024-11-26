@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auctions Oversight</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .auction-card {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .auction-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .auction-info {
+            flex: 1;
+        }
+
+        .auction-info h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #007BFF;
+        }
+
+        .auction-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .seller-link {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background-color: #b02a37;
+        }
+    </style>
+    <link rel="stylesheet" href="../../static/common.css">
+</head>
+<body>
+    <div id="navbar"></div>
+    <div class="container">
+        <h1>Auctions Oversight</h1>
+        {% for auction in auctions %}
+            <div class="auction-card">
+                <div class="auction-info">
+                    <h3>{{ auction.property.property_type }}</h3>
+                    <p><strong>Location:</strong> {{ auction.property.address }}</p>
+                    <p><strong>Ends:</strong> {{ auction.end_date }}</p>
+                    <p>
+                        <strong>Seller:</strong> 
+                        <a href="{% url 'user_details' auction.seller.id %}" class="seller-link">
+                            {{ auction.seller.username }}
+                        </a>
+                    </p>
+                </div>
+                <a href="{% url 'auction_details' auction.id %}" class="btn">View Auction</a>
+            </div>
+        {% endfor %}
+    </div>
+    <a style="margin: auto;width: fit-content;padding: 10px;margin: auto;margin-bottom: 50px;" class="btn" href="{% url 'home' %}">back</a>
+    <script src="../../static/common.js"></script>
+</body>
+</html>

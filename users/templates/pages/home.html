@@ -41,6 +41,22 @@
         .navbar .user-section {
             position: relative;
         }
+        .btn {
+            display: block;
+            
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
 
         .navbar .user-section .avatar {
             background-color: #ffffff;
@@ -197,15 +213,52 @@
                         <a href="{% url 'bids_history' %}">Bids History</a>
                     {% elif user.usertype == "seller" %}
                         <a href="{% url 'create_auction' %}">Create New Auction</a>
+                    {% elif user.usertype == "admin" %}
+                        <a href="{% url 'manage_users' %}">Manage Users</a>
+                        <a href="{% url 'auctions_oversight' %}">Auctions Oversight</a>
+                        <a href="{% url 'reporting_analytics' %}">Reporting and Analytics</a>
                     {% endif %}
                     <a href="{% url 'logout' %}">Logout</a>
                 </div>
             {% else %}
                 <a href="{% url 'login' %}" style="color: white; text-decoration: none;">Login</a>
             {% endif %}
-        </div>
+        </div>        
     </div>
-
+    <!-- Search Form -->
+    <div class="container" style="margin-bottom: 20px;">
+        <form method="get" action="{% url 'home' %}">
+            <div class="form-group">
+                <input type="text" name="search" placeholder="Search by property details..." 
+                       value="{{ request.GET.search }}" 
+                       style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px;">
+            </div>
+            <button type="submit" class="btn" style="margin-top: 10px;">Search</button>
+        </form>
+    </div>
+    <!-- Display Search Results -->
+    {% if search_query %}
+    <div class="container">
+        <h2>Search Results for "{{ search_query }}"</h2>
+        {% if search_results %}
+            <div class="auction-list">
+                {% for auction in search_results %}
+                    <a href="{% if user.is_authenticated and user.usertype == 'buyer' %}{% url 'auction_details' auction.id %}{% elif user.is_authenticated and user.usertype == 'seller' %}{% url 'edit_auction' auction.id %}{% endif %}" 
+                        class="auction-card-link">
+                        <div class="auction-card">
+                            <h3>{{ auction.property.property_type }}</h3>
+                            <p>Location: {{ auction.property.address }}</p>
+                            <p>Starting Bid: ${{ auction.starting_bid }}</p>
+                            <p>Ends: {{ auction.end_date }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No results found for "{{ search_query }}"</p>
+        {% endif %}
+    </div>
+    {% endif %}
     <!-- Tabs -->
     <div class="tabs">
         <button class="tab active" onclick="openTab(event, 'Ongoing')">Ongoing</button>

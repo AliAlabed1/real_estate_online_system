@@ -95,33 +95,52 @@ def auction_details_view(request, auction_id):
     # Fetch the auction and associated details
     auction = get_object_or_404(Auction, id=auction_id)
 
-    # Restrict access to buyers
-    if request.user.usertype != 'buyer':
-        return redirect('home')
+    # Check if the auction has ended
+    auction_ended = auction.end_date < now()
 
-    # Get the buyer's wallet
-    wallet = Wallet.objects.get(buyer=request.user)
+    # Determine the user's behavior based on their user type
+    if request.user.usertype == 'buyer':
+        # Buyers: Handle bidding logic
+        wallet = Wallet.objects.get(buyer=request.user)
 
-    # Check if the auction has a document
-    document = auction.document.file.url if hasattr(auction, 'document') else None
-
-    if request.method == 'POST':
-        # Handle bid submission
-        bid_amount = Decimal(request.POST.get('bid_amount', '0'))
-        if bid_amount > 0:
-            if wallet.balance >= bid_amount:
-                # Create a new bid
-                Bid.objects.create(auction=auction, buyer=request.user, amount=bid_amount)
-                wallet.balance -= bid_amount  # Deduct the bid amount from wallet
-                wallet.save()
-                messages.success(request, "Bid placed successfully!")
-                return redirect('bids_history')
+        if request.method == 'POST' and not auction_ended:
+            # Handle bid submission
+            bid_amount = Decimal(request.POST.get('bid_amount', '0'))
+            if bid_amount > 0:
+                if wallet.balance >= bid_amount:
+                    # Create a new bid
+                    Bid.objects.create(auction=auction, buyer=request.user, amount=bid_amount)
+                    wallet.balance -= bid_amount  # Deduct the bid amount from wallet
+                    wallet.save()
+                    messages.success(request, "Bid placed successfully!")
+                    return redirect('bids_history')
+                else:
+                    messages.error(request, "Insufficient balance in your wallet.")
             else:
-                messages.error(request, "Insufficient balance in your wallet.")
-        else:
-            messages.error(request, "Invalid bid amount.")
+                messages.error(request, "Invalid bid amount.")
 
-    return render(request, 'auctions/auction_details.html', {'auction': auction, 'wallet': wallet, 'document': document})
+        return render(request, 'auctions/auction_details.html', {
+            'auction': auction,
+            'wallet': wallet,
+            'document': auction.document.file.url if hasattr(auction, 'document') else None,
+            'auction_ended': auction_ended,
+        })
+
+    elif request.user.usertype == 'admin':
+        # Admins: Handle auction deletion
+        if request.method == 'POST' and 'delete_auction' in request.POST:
+            auction.delete()
+            messages.success(request, "Auction deleted successfully!")
+            return redirect('auctions_oversight')
+
+        return render(request, 'auctions/auction_details.html', {
+            'auction': auction,
+            'document': auction.document.file.url if hasattr(auction, 'document') else None,
+        })
+
+    else:
+        # Redirect other user types to home
+        return redirect('home')
 
 def download_document(request, auction_id):
     # Fetch the document associated with the auction

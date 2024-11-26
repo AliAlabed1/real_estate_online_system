@@ -65,3 +65,17 @@
     background-color: #007BFF;
     color: white;
 }
+
+.btn,a {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn:hover,a:hover {
+    background-color: #b02a37;
+}

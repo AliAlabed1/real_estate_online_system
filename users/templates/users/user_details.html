@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+        width: 80%;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            margin-bottom: 20px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn.danger {
+            background-color: #dc3545;
+        }
+
+        .btn.danger:hover {
+            background-color: #b02a37;
+        }
+
+        .btn.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+    <link rel="stylesheet" href="../../../auctions/static/common.css">
+
+</head>
+<body>
+    <div id="navbar"></div>
+    <div class="container">
+        <div class="user-info">
+            <h1>{{ user.username }}</h1>
+            <p>Email: {{ user.email }}</p>
+            <p>User Type: {{ user.get_usertype_display }}</p>
+        </div>
+
+        {% if user_type == 'buyer' %}
+            <h2>Bids History</h2>
+            <div class="cards-container">
+                {% for bid in bids %}
+                    <div class="card">
+                        <h3>Auction: {{ bid.auction.property.property_type }}</h3>
+                        <p>Amount: ${{ bid.amount }}</p>
+                        <p>Date: {{ bid.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif user_type == 'seller' %}
+            <h2>Auctions</h2>
+            <div class="cards-container">
+                {% for auction in auctions %}
+                    <div class="card">
+                        <h3>{{ auction.property.property_type }}</h3>
+                        <p>Location: {{ auction.property.address }}</p>
+                        <p>Status: {{ auction.get_status_display }}</p>
+                        <p>End Date: {{ auction.end_date }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" style="margin-bottom:20px;margin-top: 20px;" >
+            {% csrf_token %}
+            {% if is_self %}
+                <button class="btn danger disabled" disabled>You cannot delete yourself</button>
+            {% else %}
+                <button type="submit" name="delete" class="btn danger">Delete User</button>
+            {% endif %}
+        </form>
+        <a href="{% url 'manage_users' %}" class="btn">Go Back</a>
+    </div>
+    <script src="../../../auctions/static/common.js"></script>
+</body>
+</html>

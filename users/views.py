@@ -1,10 +1,13 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth import login
 from .models import User
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from .models import Wallet,Bid
 from decimal import Decimal
+from django.contrib.auth.decorators import user_passes_test
+from auctions.models import Auction
+
 def register(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -78,6 +81,60 @@ def bids_history_view(request):
     if request.user.usertype != 'buyer':
         return redirect('home')  # Restrict access to buyers only
 
-    bids = Bid.objects.filter(buyer=request.user).select_related('auction')
+    bids = Bid.objects.filter(buyer=request.user).select_related('auction').order_by('-created_at')
 
     return render(request, 'pages/bids_history.html', {'bids': bids})
+
+def is_admin(user):
+    return user.is_authenticated and user.usertype == 'admin'
+
+@user_passes_test(is_admin)
+def manage_users_view(request):
+    users = User.objects.all()
+    return render(request, 'pages/manage_users.html', {'users': users})
+
+@user_passes_test(is_admin)
+def auctions_oversight_view(request):
+    auctions = Auction.objects.select_related('seller', 'property')
+
+    return render(request, 'pages/auctions_oversight.html', {'auctions': auctions})
+
+
+@user_passes_test(is_admin)
+def reporting_analytics_view(request):
+    # Logic for reporting and analytics
+    return render(request, 'pages/reporting_analytics.html')
+
+@user_passes_test(is_admin)
+def user_details_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    # Check if the current user is viewing their own details
+    is_self = request.user.id == user_id
+
+    # Handle delete action
+    if request.method == 'POST' and 'delete' in request.POST:
+        if not is_self:  # Prevent self-deletion
+            user.delete()
+            return redirect('manage_users')
+
+    # Fetch role-specific details
+    if user.usertype == 'buyer':
+        bids = Bid.objects.filter(buyer=user).select_related('auction')
+        return render(request, 'users/user_details.html', {
+            'user': user,
+            'bids': bids,
+            'user_type': 'buyer',
+            'is_self': is_self,
+        })
+    elif user.usertype == 'seller':
+        auctions = Auction.objects.filter(seller=user)
+        return render(request, 'users/user_details.html', {
+            'user': user,
+            'auctions': auctions,
+            'user_type': 'seller',
+            'is_self': is_self,
+        })
+    else:
+        # Admin user
+        return render(request, 'users/user_details.html', {'user': user, 'user_type': 'admin', 'is_self': is_self})
