@@ -15,7 +15,40 @@
             gap: 50px;
             min-height: 100vh;
         }
+        /* Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+        }
+        .navbar .user-section {
+            position: relative;
+        }
+        .navbar .user-section .avatar {
+            background-color: #ffffff;
+            color: #007BFF;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
         .bids-container {
             width: 90%;
             max-width: 800px;
@@ -65,10 +98,21 @@
             margin-top: 50px;
         }
     </style>
-    <link rel="stylesheet" href="../../static/common.css">
+    
 </head>
 <body>
-    <div id="navbar"></div>
+    <div class="navbar">
+        <div class="logo">
+            <h1>Online Auction</h1>
+        </div>
+        <div class="user-section">
+            {% if user.is_authenticated %}
+                <div id="avatar" class="avatar">
+                    {{ user.username|slice:":1" }}
+                </div>
+            {% endif %}
+        </div>        
+    </div>
     <div class="bids-container">
         <h1>My Bids</h1>
         {% if bids %}
@@ -84,6 +128,6 @@
         {% endif %}
     </div>
     <a style="margin: auto; width: fit-content; padding: 10px; margin: auto; margin-bottom: 50px;" class="btn" href="{% url 'home' %}">Back</a>
-    <script src="../../static/common.js"></script>
+    
 </body>
 </html>

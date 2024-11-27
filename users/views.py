@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Wallet,Bid
 from decimal import Decimal
 from django.contrib.auth.decorators import user_passes_test
-from auctions.models import Auction
+from auctions.models import Auction,Document
 
 def register(request):
     if request.method == 'POST':
@@ -100,10 +100,31 @@ def auctions_oversight_view(request):
     return render(request, 'pages/auctions_oversight.html', {'auctions': auctions})
 
 
-@user_passes_test(is_admin)
+@user_passes_test(lambda u: u.is_authenticated and u.usertype == 'admin')
 def reporting_analytics_view(request):
-    # Logic for reporting and analytics
-    return render(request, 'pages/reporting_analytics.html')
+    selected_category = request.GET.get('category', 'auctions')
+
+    data = None
+    headers = None
+
+    if selected_category == 'auctions':
+        data = Auction.objects.all()
+        headers = ['ID', 'Property Type', 'Location', 'Starting Bid', 'Reserve Price', 'Start Date', 'End Date', 'Status']
+    elif selected_category == 'bids':
+        data = Bid.objects.select_related('auction', 'buyer').all()
+        headers = ['ID', 'Auction', 'Buyer', 'Amount', 'Created At']
+    elif selected_category == 'documents':
+        data = Document.objects.select_related('auction').all()
+        headers = ['ID', 'Auction', 'File Name', 'Uploaded At']
+    elif selected_category == 'users':
+        data = User.objects.all()
+        headers = ['ID', 'Username', 'Email', 'User Type', 'Date Joined']
+
+    return render(request, 'pages/reporting_analytics.html', {
+        'selected_category': selected_category,
+        'data': data,
+        'headers': headers,
+    })
 
 @user_passes_test(is_admin)
 def user_details_view(request, user_id):
