@@ -47,11 +47,12 @@ def create_auction(request):
 @login_required
 def edit_auction(request, auction_id):
     auction = get_object_or_404(Auction, id=auction_id)
-
+    
     if request.user != auction.seller:
         return redirect('home')
 
     if request.method == 'POST':
+        print(request.FILES)
         # Handle auction updates
         if 'update' in request.POST:
             auction.starting_bid = request.POST.get('starting_bid')
@@ -82,7 +83,6 @@ def edit_auction(request, auction_id):
                 document, created = Document.objects.get_or_create(auction=auction)
                 document.file = form.cleaned_data['file']
                 document.save()
-                messages.success(request, "Document uploaded successfully!")
                 return redirect('edit_auction', auction_id=auction.id)
     else:
         form = DocumentForm()
@@ -145,7 +145,7 @@ def auction_details_view(request, auction_id):
 def download_document(request, auction_id):
     # Fetch the document associated with the auction
     document = get_object_or_404(Document, auction__id=auction_id)
-    print(document.file)
+    
     path = f'{os.getcwd()}/{document.file}'
     document.file = path
     try:

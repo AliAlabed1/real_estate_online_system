@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'IS499_Project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'is499_db',
+        'NAME': 'is499',
         'USER': 'ALI',
         'PASSWORD': '12345',
         'HOST': 'localhost',  # Or the host where your PostgreSQL is running

@@ -9,6 +9,5 @@ urlpatterns = [
     path('manage_users/', views.manage_users_view, name='manage_users'),
     path('auctions_oversight/', views.auctions_oversight_view, name='auctions_oversight'),
     path('reporting_analytics/', views.reporting_analytics_view, name='reporting_analytics'),
-    path('manage_users/', views.manage_users_view, name='manage_users'),
     path('user_details/<int:user_id>/', views.user_details_view, name='user_details'),
 ]

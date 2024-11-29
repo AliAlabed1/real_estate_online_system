@@ -158,24 +158,19 @@
             </form>
 
             <!-- Document Section -->
-            <form  method="post" enctype="multipart/form-data" style="margin-top: 20px;">
+            <form style="margin-top:20px;margin-bottom: 20px;" method="post" enctype="multipart/form-data" style="margin-top: 20px;">
                 {% csrf_token %}
                 {% if auction.document %}
                     <div style="margin-bottom: 20px; width: 100%;">
                         <a  href="{% url 'download_document' auction.id %}" class="btn" target="_blank">Show Document</a>
                     </div>
-                    <button type="button" class="btn" style="margin-top: 10px;" onclick="toggleFileInput()">Change Document</button>
+                    
                 {% else %}
-                    <div class="form-group">
-                        <label for="file">Attach Document</label>
-                        <input type="file" name="file" id="file" required>
-                    </div>
-                    <button class="btn" type="submit" name="upload_document">Attach Document</button>
+                
                 {% endif %}
-                <div id="file-input-container" class="form-group hidden">
-                    <label for="file">Choose New Document</label>
-                    <input type="file" name="file" id="file" required>
-                    <button class="btn" type="submit" name="upload_document">Upload Document</button>
+                <div id="file-input-container" class="form-group ">
+                    {{ form.as_p }}
+                    <button type="submit" name="upload_document">Attach Document</button>
                 </div>
             </form>
 
